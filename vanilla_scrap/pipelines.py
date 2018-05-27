@@ -33,10 +33,10 @@ class DuplicatesPipeline(object):
             pickle.dump(self.ids_seen, f)
 
     def process_item(self, item, spider):
-        if item['review_id'] in self.ids_seen:
+        if item['aid'] in self.ids_seen:
             raise DropItem("Duplicate item found: %s" % item)
         else:
-            self.ids_seen.add(item['review_id'])
+            self.ids_seen.add(item['aid'])
             return item
 
 class CommunityPipeline(object):

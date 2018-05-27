@@ -16,6 +16,7 @@ class MovieScrapItem(scrapy.Item):
     source = scrapy.Field()
     pass
 
+
 class MovieCommentItem(scrapy.Item):
     # define the fields for your item here like:
     review_id = scrapy.Field()
@@ -29,6 +30,7 @@ class MovieCommentItem(scrapy.Item):
     source = scrapy.Field()
     pass
 
+
 class CommunityItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
@@ -40,12 +42,15 @@ class CommunityItem(scrapy.Item):
     date = scrapy.Field()
     pass
 
+
 class NaverNewsItem(scrapy.Item):
     aid = scrapy.Field()
     oid = scrapy.Field()
     sid1 = scrapy.Field()
     rank = scrapy.Field()
+    type = scrapy.Field()
     url = scrapy.Field()
     title = scrapy.Field()
+    detail_txt = scrapy.Field()
     date = scrapy.Field()
     pass

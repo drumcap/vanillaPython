@@ -71,7 +71,7 @@ DOWNLOAD_DELAY = 0.2
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
    # 'vanilla_scrap.pipelines.JsonPipeline': 300,
-   # 'vanilla_scrap.pipelines.DuplicatesPipeline': 200,
+   'vanilla_scrap.pipelines.DuplicatesPipeline': 200,
    'vanilla_scrap.pipelines.JsonWriterPipeline': 300,
    # 'vanilla_scrap.pipelines.CsvPipeline': 300,
 }
