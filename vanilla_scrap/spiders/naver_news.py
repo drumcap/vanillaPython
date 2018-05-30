@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from urllib.parse import urlparse, parse_qs, parse_qsl, urlencode, urlunparse
 from bs4 import BeautifulSoup
 from vanilla_scrap.items import NaverNewsItem
@@ -10,25 +10,26 @@ import scrapy
 ########################################################################
 # Constants
 ########################################################################
-# URL_TMPL = 'http://news.naver.com/main/ranking/popularDay.nhn?rankingType=popular_day&sectionId=000&date={date}'  # noqa
+URL_TMPL = 'http://news.naver.com/main/ranking/popularDay.nhn?rankingType=popular_day&sectionId=100&date={date}'  # noqa
 # URL_TMPL = 'http://news.naver.com/main/ranking/popularDay.nhn?rankingType=popular_day&date={date}'  # noqa
 
 # ENTER_RANK = 'http://m.entertain.naver.com/ranking.json?rankingDate=20180528'
 # MOVIE = 'http://m.entertain.naver.com/movie'
 # SPORTS = 'http://m.sports.naver.com/ranking.nhn?date=20180526'
 
-URL_TMPL = 'http://m.news.naver.com/rankingList.nhn?sid1=100&date={date}'  # 모바일
+# URL_TMPL = 'http://m.news.naver.com/rankingList.nhn?sid1=100&date={date}'  # 모바일
 
 # DESKTOP
 # LINK_CSS_SELECTOR = 'td.content dt > a'
-# SELECTOR_TITLE = ''
+LINK_CSS_SELECTOR = 'td.content .ranking_item .ranking_headline > a'
 
 # MOBILE
-SELECTOR_LINK = 'div.ranking_news ul > li > a'
-SELECTOR_TITLE = ' .commonlist_tx_headline'
+# SELECTOR_LINK = 'div.ranking_news ul > li > a'
+# SELECTOR_TITLE = ' .commonlist_tx_headline'
 
-# START_DATE = date(2004, 4, 20)
-START_DATE = date(2018, 5, 27)
+START_DATE = date(2004, 4, 20)
+# END_DATE = date(2014, 12, 31)
+# START_DATE = date(2018, 5, 30)
 END_DATE = date.today()
 DATE_FMT = '%Y%m%d'
 DATE_RE = re.compile('&date=(.*?)$', re.DOTALL)  # date 파라미터 가져오는 값 가져오기
@@ -95,33 +96,42 @@ class NaverNewsSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        # date = DATE_RE.findall(response.url)[0]
-        date = get_query_field(response.url, 'date')
-        urls = response.css(SELECTOR_LINK + '::attr(href)').extract()
-        titles = response.css(SELECTOR_LINK + SELECTOR_TITLE + '::text').extract()
+        urls = response.css(LINK_CSS_SELECTOR + '::attr(href)').extract()
+        titles = response.css(LINK_CSS_SELECTOR + '::text').extract()
         iterable = enumerate(zip(urls, titles), start=1)
 
         for rank, (news_url, news_title) in iterable:
             url = response.urljoin(news_url)  # self.allowed_domains[1] + news_url
-            rank_url = set_query_field(url, 'rank', rank)
-            yield response.follow(url=rank_url, callback=self.parse_naver_detail)
+            yield response.follow(url=url, callback=self.parse_naver_detail)
+            # url_qs = parse_qs(urlparse(rank_url).query)
+            # item = NaverNewsItem()
+            # item['aid'] = url_qs['aid'][0]
+            # item['oid'] = url_qs['oid'][0]
+            # item['sid1'] = url_qs['sid1'][0]
+            # item['rank'] = url_qs['rank'][0]
+            # item['date'] = url_qs['date'][0]
+            # item['url'] = rank_url
+            # item['title'] = news_title
+            # yield item
 
-        sid1 = int(get_query_field(response.url, 'sid1')) + 1
-        if sid1 in CATEGORIES:
-            next_url = set_query_field(response.url, 'sid1', sid1, replace=True)
+        next_sid = int(get_query_field(response.url, 'sectionId')) + 1
+        if next_sid in CATEGORIES:
+            next_url = set_query_field(response.url, 'sectionId', next_sid, replace=True)
             yield response.follow(url=next_url, callback=self.parse)
 
     def parse_naver_detail(self, response):
         soup = BeautifulSoup(response.text, 'html.parser')
         title = soup.find("meta",  property="og:title")["content"].strip()
-        detail_txt = soup.find(id="dic_area").get_text().strip()
+        for s in soup(['script', 'style']):
+            s.decompose()
+        detail_txt = soup.find(id="articleBodyContents").get_text().strip()
         url_qs = parse_qs(urlparse(response.url).query)
         item = NaverNewsItem()
         item['aid'] = url_qs['aid'][0]
         item['oid'] = url_qs['oid'][0]
-        item['sid1'] = url_qs['sid1'][0]
-        item['rank'] = url_qs['rank'][0]
-        item['date'] = url_qs['date'][0]
+        item['sid1'] = url_qs['rankingSectionId'][0]
+        item['rank'] = int(url_qs['rankingSeq'][0])
+        item['date'] = datetime.strptime(url_qs['date'][0],'%Y%m%d').astimezone().isoformat()
         item['url'] = response.url
         item['title'] = title
         item['detail_txt'] = detail_txt.strip()
