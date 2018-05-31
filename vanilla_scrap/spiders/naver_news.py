@@ -16,6 +16,14 @@ URL_TMPL = 'http://news.naver.com/main/ranking/popularDay.nhn?rankingType=popula
 # ENTER_RANK = 'http://m.entertain.naver.com/ranking.json?rankingDate=20180528'
 # MOVIE = 'http://m.entertain.naver.com/movie'
 # SPORTS = 'http://m.sports.naver.com/ranking.nhn?date=20180526'
+# SPORTS_KBASEBALL = 'http://sports.news.naver.com/kbaseball/news/index.nhn?date=20150727&type=popular&isphoto=N'
+
+# SPORTS_WBASEBALL = 'http://sports.news.naver.com/wbaseball/news/index.nhn?date=20150727&type=popular&isphoto=N'
+# SPORTS_KFOOTBALL = 'http://sports.news.naver.com/kfootball/news/index.nhn?date=20150727&type=popular&isphoto=N'
+# SPORTS_WFOOTBALL = 'http://sports.news.naver.com/wfootball/news/index.nhn?date=20150727&type=popular&isphoto=N'
+# SPORTS_WFOOTBALL = 'http://sports.news.naver.com/basketball/news/index.nhn?date=20150727&type=popular&isphoto=N'
+# SPORTS_WFOOTBALL = 'http://sports.news.naver.com/volleyball/news/index.nhn?date=20150727&type=popular&isphoto=N'
+# SPORTS_WFOOTBALL = 'http://sports.news.naver.com/golf/news/index.nhn?date=20150727&type=popular&isphoto=N'
 
 # URL_TMPL = 'http://m.news.naver.com/rankingList.nhn?sid1=100&date={date}'  # 모바일
 
@@ -35,7 +43,7 @@ DATE_FMT = '%Y%m%d'
 DATE_RE = re.compile('&date=(.*?)$', re.DOTALL)  # date 파라미터 가져오는 값 가져오기
 
 CATEGORIES = range(100, 106)
-
+SPORTS_CATEGORIES = ['kbaseball', 'wbaseball', 'kfootball', 'wfootball', 'basketball', 'volleyball', 'golf', 'general', 'esports']
 
 # get_qs = lambda q, news_url: parse_qs(urlparse(news_url).query).get(q)[0]
 
